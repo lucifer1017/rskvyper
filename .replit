@@ -1,0 +1,12 @@
+language = "python3"
+run = "brownie compile"
+
+[nix]
+channel = "stable-22_11"
+
+[deploy]
+run = ["sh", "-c", "brownie run scripts/deploy --network rootstock-testnet"]
+
+[env]
+PYTHONUNBUFFERED = "1"
+

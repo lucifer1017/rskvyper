@@ -1,0 +1,27 @@
+{
+  "detectors_to_run": "all",
+  "exclude_dependencies": true,
+  "exclude_informational": false,
+  "exclude_optimization": false,
+  "exclude_low": false,
+  "exclude_medium": false,
+  "exclude_high": false,
+  "json": "",
+  "legacy_ast": false,
+  "print": "human",
+  "solc_force": false,
+  "solc_remaps": [],
+  "solc_version": null,
+  "solc_args": "",
+  "truffle_version": null,
+  "vyper": true,
+  "vyper_version": "0.3.10",
+  "disable_solc_warnings": false,
+  "npx_disable": false,
+  "filter_paths": [
+    "node_modules",
+    "build",
+    ".cache"
+  ]
+}
+

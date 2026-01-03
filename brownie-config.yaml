@@ -1,0 +1,51 @@
+# Brownie Configuration for Rootstock Networks
+# https://www.brownie-console.com/
+
+dependencies:
+  # Add any dependencies here if needed
+  # - OpenZeppelin/openzeppelin-contracts@4.0.0
+
+compiler:
+  vyper:
+    version: "0.3.10"
+
+networks:
+  # Rootstock Testnet
+  rootstock-testnet:
+    host: ${RSK_TESTNET_RPC:-https://public-node.testnet.rsk.co}
+    chainid: 31
+    explorer: https://explorer.testnet.rsk.co/api
+    
+  # Rootstock Mainnet
+  rootstock-mainnet:
+    host: ${RSK_MAINNET_RPC:-https://public-node.rsk.co}
+    chainid: 30
+    explorer: https://blockscout.com/rsk/mainnet/api
+
+  # Local development (Ganache)
+  development:
+    cmd: brownie console
+    host: http://127.0.0.1:8545
+    cmd_settings:
+      port: 8545
+
+# Wallet settings
+wallets:
+  from_key: ${PRIVATE_KEY}
+
+# Gas settings
+gas_limit: auto
+gas_price: auto
+
+# Project settings
+project_structure:
+  contracts: contracts
+  tests: tests
+  scripts: scripts
+
+# Report settings
+report:
+  exclude_contracts:
+    - SafeMath
+    - TestContract
+
