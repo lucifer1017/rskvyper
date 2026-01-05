@@ -22,13 +22,6 @@ networks:
     chainid: 30
     explorer: https://blockscout.com/rsk/mainnet/api
 
-  # Local development (Ganache)
-  development:
-    cmd: brownie console
-    host: http://127.0.0.1:8545
-    cmd_settings:
-      port: 8545
-
 # Wallet settings
 wallets:
   from_key: ${PRIVATE_KEY}

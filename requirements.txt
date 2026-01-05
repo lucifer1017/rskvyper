@@ -1,16 +1,15 @@
-# Brownie Framework
-eth-brownie>=1.19.0
+# Brownie Framework - installs pytest and all dependencies automatically
+eth-brownie>=1.20.0
 
 # Vyper Compiler
 vyper>=0.3.10,<0.4.0
 
-# Testing
-pytest>=7.0.0
-pytest-cov>=4.0.0
+# Testing - Brownie already includes pytest, just add coverage
+pytest-cov
 
 # Static Analysis
-slither-analyzer>=0.9.0
+slither-analyzer
 
 # Environment Variables
-python-dotenv>=1.0.0
+python-dotenv
 

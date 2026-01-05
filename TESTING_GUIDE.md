@@ -79,11 +79,23 @@ Compiling contracts...
 - ✅ No compilation errors
 - ✅ Build artifacts created in `build/` directory
 
-### Step 4: Run Tests
+### Step 4: Register Networks (First Time Only)
 
 ```bash
-# Run all tests
-brownie test
+brownie networks add Ethereum rootstock-testnet host=https://public-node.testnet.rsk.co chainid=31
+brownie networks add Ethereum rootstock-mainnet host=https://public-node.rsk.co chainid=30
+```
+
+Verify with:
+```bash
+brownie networks list
+```
+
+### Step 5: Run Tests
+
+```bash
+# Run all tests on testnet
+brownie test --network rootstock-testnet
 ```
 
 **Expected output:**
@@ -105,16 +117,16 @@ tests/test_vault.py::test_vault_deployment PASSED
 **Run specific test files:**
 ```bash
 # Test only ERC20
-brownie test tests/test_erc20.py
+brownie test tests/test_erc20.py --network rootstock-testnet
 
 # Test only Vault
-brownie test tests/test_vault.py
+brownie test tests/test_vault.py --network rootstock-testnet
 
 # Run with verbose output
-brownie test -v
+brownie test -v --network rootstock-testnet
 ```
 
-### Step 5: Security Analysis
+### Step 6: Security Analysis
 
 ```bash
 # Run security analysis
@@ -126,41 +138,7 @@ python scripts/analyze.py
 - ✅ Slither analysis runs (with note about Vyper limitations)
 - ✅ No critical security issues
 
-### Step 6: Test Network Configuration
-
-```bash
-# Setup networks (first time only)
-brownie run scripts/setup_networks
-
-# List available networks
-brownie networks list
-```
-
-**Expected:**
-- ✅ Rootstock testnet and mainnet appear in network list
-- ✅ Networks are properly configured
-
-### Step 7: Test Deployment (Local/Testnet)
-
-#### Option A: Local Development Network
-
-```bash
-# Start local network (in separate terminal)
-brownie console
-
-# In Brownie console:
->>> from brownie import ERC20, accounts
->>> account = accounts[0]
->>> token = ERC20.deploy("Test Token", "TEST", 18, 1000000 * 10**18, {"from": account})
->>> token.address
-```
-
-**Expected:**
-- ✅ Contract deploys successfully
-- ✅ Contract address is returned
-- ✅ No deployment errors
-
-#### Option B: Testnet Deployment (Requires Private Key)
+### Step 7: Test Deployment (Testnet)
 
 **⚠️ Only do this if you have testnet RBTC and want to test real deployment**
 

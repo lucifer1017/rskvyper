@@ -60,9 +60,15 @@ The only zero-setup Vyper + Brownie environment on Replit. Compile, test, and de
    brownie compile
    ```
 
-5. **Run tests:**
+5. **Register networks (first time only):**
    ```bash
-   brownie test
+   brownie networks add Ethereum rootstock-testnet host=https://public-node.testnet.rsk.co chainid=31
+   brownie networks add Ethereum rootstock-mainnet host=https://public-node.rsk.co chainid=30
+   ```
+
+6. **Run tests:**
+   ```bash
+   brownie test --network rootstock-testnet
    ```
 
 ## 📁 Project Structure
@@ -99,7 +105,12 @@ Networks are configured in `brownie-config.yaml`:
 
 - **Rootstock Testnet**: Chain ID 31
 - **Rootstock Mainnet**: Chain ID 30
-- **Local Development**: Ganache (port 8545)
+
+**First-time setup — Register networks with Brownie:**
+```bash
+brownie networks add Ethereum rootstock-testnet host=https://public-node.testnet.rsk.co chainid=31
+brownie networks add Ethereum rootstock-mainnet host=https://public-node.rsk.co chainid=30
+```
 
 ### Environment Variables
 
