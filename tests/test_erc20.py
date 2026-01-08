@@ -1,9 +1,15 @@
 """
 Test suite for ERC20 token contract
+
+Tests include:
+- Basic ERC20 functionality
+- Zero address validation
+- increaseAllowance/decreaseAllowance functions
+- Multi-user scenarios
 """
 
 import pytest
-from brownie import ERC20, accounts, reverts
+from brownie import ERC20, accounts, reverts, ZERO_ADDRESS
 
 
 @pytest.mark.unit
@@ -41,10 +47,21 @@ def test_transfer(token, deployer, user1):
     assert token.balanceOf(user1) == initial_balance_user1 + amount
     
     # Check event
-    assert len(tx.events) == 1
+    assert "Transfer" in tx.events
     assert tx.events["Transfer"]["sender"] == deployer
     assert tx.events["Transfer"]["receiver"] == user1
     assert tx.events["Transfer"]["value"] == amount
+
+
+@pytest.mark.unit
+def test_transfer_to_zero_address(token, deployer):
+    """
+    Test that transfer to zero address is blocked
+    """
+    amount = 100 * 10**18
+    
+    with reverts("Cannot transfer to zero address"):
+        token.transfer(ZERO_ADDRESS, amount, {"from": deployer})
 
 
 @pytest.mark.unit
@@ -71,25 +88,37 @@ def test_approve(token, deployer, user1):
     assert token.allowance(deployer, user1) == amount
     
     # Check event
-    assert len(tx.events) == 1
+    assert "Approval" in tx.events
     assert tx.events["Approval"]["owner"] == deployer
     assert tx.events["Approval"]["spender"] == user1
     assert tx.events["Approval"]["value"] == amount
 
 
 @pytest.mark.unit
+def test_approve_zero_address(token, deployer):
+    """
+    Test that approving zero address is blocked
+    """
+    amount = 50 * 10**18
+    
+    with reverts("Cannot approve zero address"):
+        token.approve(ZERO_ADDRESS, amount, {"from": deployer})
+
+
+@pytest.mark.unit
 def test_transferFrom(token, deployer, user1, user2):
     """
-    Test transferFrom functionality
+    Test transferFrom functionality with different users
     """
     amount = 75 * 10**18
     
-    # Approve first
+    # Approve user1 to spend deployer's tokens
     token.approve(user1, amount, {"from": deployer})
     
     initial_balance_deployer = token.balanceOf(deployer)
     initial_balance_user2 = token.balanceOf(user2)
     
+    # user1 transfers from deployer to user2
     tx = token.transferFrom(deployer, user2, amount, {"from": user1})
     
     assert token.balanceOf(deployer) == initial_balance_deployer - amount
@@ -97,10 +126,23 @@ def test_transferFrom(token, deployer, user1, user2):
     assert token.allowance(deployer, user1) == 0
     
     # Check event
-    assert len(tx.events) == 1
+    assert "Transfer" in tx.events
     assert tx.events["Transfer"]["sender"] == deployer
     assert tx.events["Transfer"]["receiver"] == user2
     assert tx.events["Transfer"]["value"] == amount
+
+
+@pytest.mark.unit
+def test_transferFrom_to_zero_address(token, deployer, user1):
+    """
+    Test that transferFrom to zero address is blocked
+    """
+    amount = 50 * 10**18
+    
+    token.approve(user1, amount, {"from": deployer})
+    
+    with reverts("Cannot transfer to zero address"):
+        token.transferFrom(deployer, ZERO_ADDRESS, amount, {"from": user1})
 
 
 @pytest.mark.unit
@@ -129,6 +171,84 @@ def test_transferFrom_insufficient_balance(token, deployer, user1, user2):
     
     with reverts("Insufficient balance"):
         token.transferFrom(deployer, user2, amount, {"from": user1})
+
+
+@pytest.mark.unit
+def test_increase_allowance(token, deployer, user1):
+    """
+    Test increaseAllowance functionality
+    """
+    initial_allowance = 50 * 10**18
+    increase_amount = 25 * 10**18
+    
+    # Set initial allowance
+    token.approve(user1, initial_allowance, {"from": deployer})
+    assert token.allowance(deployer, user1) == initial_allowance
+    
+    # Increase allowance
+    tx = token.increaseAllowance(user1, increase_amount, {"from": deployer})
+    
+    expected_allowance = initial_allowance + increase_amount
+    assert token.allowance(deployer, user1) == expected_allowance
+    
+    # Check event
+    assert "Approval" in tx.events
+    assert tx.events["Approval"]["value"] == expected_allowance
+
+
+@pytest.mark.unit
+def test_decrease_allowance(token, deployer, user1):
+    """
+    Test decreaseAllowance functionality
+    """
+    initial_allowance = 100 * 10**18
+    decrease_amount = 25 * 10**18
+    
+    # Set initial allowance
+    token.approve(user1, initial_allowance, {"from": deployer})
+    assert token.allowance(deployer, user1) == initial_allowance
+    
+    # Decrease allowance
+    tx = token.decreaseAllowance(user1, decrease_amount, {"from": deployer})
+    
+    expected_allowance = initial_allowance - decrease_amount
+    assert token.allowance(deployer, user1) == expected_allowance
+    
+    # Check event
+    assert "Approval" in tx.events
+    assert tx.events["Approval"]["value"] == expected_allowance
+
+
+@pytest.mark.unit
+def test_decrease_allowance_below_zero(token, deployer, user1):
+    """
+    Test decreaseAllowance fails when result would be negative
+    """
+    initial_allowance = 50 * 10**18
+    decrease_amount = 100 * 10**18  # More than allowed
+    
+    token.approve(user1, initial_allowance, {"from": deployer})
+    
+    with reverts("Decreased allowance below zero"):
+        token.decreaseAllowance(user1, decrease_amount, {"from": deployer})
+
+
+@pytest.mark.unit
+def test_increase_allowance_zero_address(token, deployer):
+    """
+    Test increaseAllowance fails for zero address
+    """
+    with reverts("Cannot approve zero address"):
+        token.increaseAllowance(ZERO_ADDRESS, 100, {"from": deployer})
+
+
+@pytest.mark.unit
+def test_decrease_allowance_zero_address(token, deployer):
+    """
+    Test decreaseAllowance fails for zero address
+    """
+    with reverts("Cannot approve zero address"):
+        token.decreaseAllowance(ZERO_ADDRESS, 100, {"from": deployer})
 
 
 @pytest.mark.unit
@@ -166,3 +286,27 @@ def test_total_supply(token):
     assert total_supply > 0
     assert total_supply == 10_000_000 * 10**18
 
+
+@pytest.mark.integration
+def test_multi_user_transfers(token, deployer, user1, user2, user3):
+    """
+    Integration test: Multi-user transfer scenarios
+    """
+    # Deployer sends to user1
+    amount1 = 1000 * 10**18
+    token.transfer(user1, amount1, {"from": deployer})
+    assert token.balanceOf(user1) == amount1
+    
+    # User1 sends to user2
+    amount2 = 500 * 10**18
+    token.transfer(user2, amount2, {"from": user1})
+    assert token.balanceOf(user1) == amount1 - amount2
+    assert token.balanceOf(user2) == amount2
+    
+    # User2 approves user3, user3 transfers to user1
+    amount3 = 200 * 10**18
+    token.approve(user3, amount3, {"from": user2})
+    token.transferFrom(user2, user1, amount3, {"from": user3})
+    
+    assert token.balanceOf(user2) == amount2 - amount3
+    assert token.balanceOf(user1) == (amount1 - amount2) + amount3

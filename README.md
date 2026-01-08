@@ -6,9 +6,9 @@ The only zero-setup Vyper + Brownie environment on Replit. Compile, test, and de
 
 - ✅ **Brownie + Vyper pre-installed** via Replit Nix
 - ✅ **Rootstock testnet/mainnet** networks configured
-- ✅ **Example contracts** with checked arithmetic:
-  - `ERC20.vy` - Standard ERC20 token implementation
-  - `Vault.vy` - Simple deposit/withdraw vault
+- ✅ **Example contracts** with security features:
+  - `ERC20.vy` - ERC20 token with zero-address validation & safe allowance functions
+  - `Vault.vy` - Vault with inflation attack protection (virtual shares)
 - ✅ **Comprehensive test suite** using Pytest
 - ✅ **Slither static analysis** integration
 - ✅ **One-click deploy & verify** scripts
@@ -50,10 +50,14 @@ The only zero-setup Vyper + Brownie environment on Replit. Compile, test, and de
    ```
 
 3. **Set up environment variables:**
+   Create a `.env` file in the project root with:
    ```bash
-   cp .env.example .env
-   # Edit .env and add your PRIVATE_KEY
+   # .env file content
+   PRIVATE_KEY=your_private_key_here
+   RSK_TESTNET_RPC=https://public-node.testnet.rsk.co
+   RSK_MAINNET_RPC=https://public-node.rsk.co
    ```
+   **WARNING:** Never commit your `.env` file to version control!
 
 4. **Compile contracts:**
    ```bash
